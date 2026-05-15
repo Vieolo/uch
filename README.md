@@ -62,6 +62,7 @@ commands:
     variables:
       name:
         type: string
+        prompt: What's your name?
         default: world
   deploy:
     cmd: ./deploy.sh {{confirm}}
