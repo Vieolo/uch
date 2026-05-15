@@ -1,5 +1,7 @@
-# uch (Unknown Command Helper)
-CLI to run common commands you would need periodically, but not frequent enough to memorise
+# uch (Universal Command Helper)
+We all re-use some commands across our projects that we need to type everytime.
+
+`uch` is a CLI that uses a centralized storage to store all your custom commands, encrypt those that have sensitive data, and run them using their nickname
 
 ## install
 
