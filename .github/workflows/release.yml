@@ -1,33 +1,39 @@
-name: Create Release
+name: Release
+
 on:
   push:
     tags:
-      - '*'
+      # Strict semver tags only: v1.2.3. Excludes v1.2.3-rc1 etc. by design.
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  # Needed for goreleaser to create the GitHub Release in this repo.
+  contents: write
 
 jobs:
-  create_release:
-    name: Create Release
+  goreleaser:
+    name: goreleaser
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-        
-      - name: Read Changelog
-        id: changelog
-        run: |
-          tag_name=$(git describe --tags --abbrev=0)
-          release_notes=$(sed -n '/## '"$tag_name"'/,/## v/{/## v/!p;}' changelog.md)
-          echo "${release_notes}" > ${{ runner.temp }}/release_notes.txt
-          
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          body_path: ${{ runner.temp }}/release_notes.txt
-          draft: false
-          prerelease: false
+          # goreleaser needs full history to build the changelog from commits.
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          # Default token: enough to publish the release to vieolo/uch.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PAT with write access to vieolo/homebrew-tap. See repo Settings → Secrets.
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
