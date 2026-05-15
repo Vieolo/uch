@@ -4,9 +4,19 @@
 
 ## Install
 
+**Homebrew (macOS / Linux)** — recommended:
+
+```bash
+brew install vieolo/tap/uch
+```
+
+**From source** (requires Go):
+
 ```bash
 go install github.com/vieolo/uch@latest
 ```
+
+**Pre-built binaries** for Linux, macOS, and Windows are attached to every [GitHub release](https://github.com/vieolo/uch/releases).
 
 ## Quick start
 
@@ -113,3 +123,8 @@ The following fields are committed-stable: renaming or removing them is a breaki
 Unknown fields are rejected on load so typos and version mismatches surface immediately.
 
 A `created_by` field is written at every save (e.g. `created_by: uch 0.2.0`) as a diagnostic breadcrumb. It is never used for compatibility logic.
+
+## Roadmap
+- [ ] Improve the UX of config manipulation commands, such as interactive `add` commnad
+- [ ] Add password caching for the sessions
+- [ ] Dynamic `select` variable using the output of the command
