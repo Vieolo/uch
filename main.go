@@ -1,7 +1,15 @@
 package main
 
-import "github.com/vieolo/uch/cmd"
+import (
+	_ "embed"
+
+	"github.com/vieolo/uch/cmd"
+)
+
+//go:embed go.yaml
+var thisGyByte []byte
 
 func main() {
+	cmd.ThisGyByte = thisGyByte
 	cmd.Execute()
 }
