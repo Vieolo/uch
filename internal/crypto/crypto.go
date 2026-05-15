@@ -18,6 +18,7 @@ import (
 
 	"filippo.io/age"
 	"filippo.io/age/armor"
+	"github.com/vieolo/uch/internal/fsutil"
 )
 
 // ErrWrongPassword is returned when the master password fails to unlock the identity.
@@ -102,7 +103,7 @@ func writeEncryptedIdentity(path string, id *age.X25519Identity, password string
 		return fmt.Errorf("close armor writer: %w", err)
 	}
 
-	if err := os.WriteFile(path, buf.Bytes(), os.FileMode(0600)); err != nil {
+	if err := fsutil.AtomicWriteFile(path, buf.Bytes(), os.FileMode(0600)); err != nil {
 		return fmt.Errorf("write identity file: %w", err)
 	}
 	return nil

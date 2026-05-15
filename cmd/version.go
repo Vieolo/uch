@@ -6,26 +6,32 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// The bytes is injected from main.go downward
+// ThisGyByte holds the bytes of the project's go.yaml, embedded by main.go.
+// It is the single source of truth for the CLI version.
 var ThisGyByte []byte
 
-// versionCmd represents the version command
+// currentVersion returns the version from the embedded go.yaml, or "dev" if
+// the bytes are missing or unparseable (e.g. during tests).
+func currentVersion() string {
+	if len(ThisGyByte) == 0 {
+		return "dev"
+	}
+	type gyStruct struct {
+		Version string `yaml:"version"`
+	}
+	var gy gyStruct
+	if err := yaml.Unmarshal(ThisGyByte, &gy); err != nil || gy.Version == "" {
+		return "dev"
+	}
+	return gy.Version
+}
+
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Displays the version of uch",
 	Long:  "Displays the version of uch",
 	Run: func(cmd *cobra.Command, args []string) {
-		type gyStruct struct {
-			Version string `yaml:"version"`
-		}
-
-		var gy gyStruct
-		err := yaml.Unmarshal(ThisGyByte, &gy)
-		if err != nil {
-			termange.PrintErrorln(err.Error())
-			return
-		}
-		termange.PrintInfof("v%s\n", gy.Version)
+		termange.PrintInfof("v%s\n", currentVersion())
 	},
 }
 
