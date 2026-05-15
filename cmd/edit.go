@@ -67,7 +67,7 @@ save.`,
 // buildEditView returns a copy of cfg with sensitive bodies replaced for the
 // editor view. In admin mode they are decrypted; otherwise they are masked.
 func buildEditView(cfg config.Config, id *age.X25519Identity) config.Config {
-	out := config.Config{Encryption: cfg.Encryption, Commands: make(map[string]config.Command, len(cfg.Commands))}
+	out := config.Config{Commands: make(map[string]config.Command, len(cfg.Commands))}
 	for name, entry := range cfg.Commands {
 		if entry.Sensitive {
 			if id != nil {

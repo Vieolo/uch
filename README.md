@@ -46,33 +46,70 @@ uch run db-prod         # prompts for the master password, then runs
 
 ## Variables
 
-Three types, all static:
+Three types, all static. Variables are an **ordered list** — the user is prompted in the order you declare:
 
 ```yaml
 commands:
   flutter-build:
     cmd: flutter build {{platform}}
     variables:
-      platform:
+      - name: platform
         type: select
         prompt: Pick a platform
         options: [ios, android, web]
   greet:
     cmd: echo "hello, {{name}}"
     variables:
-      name:
+      - name: name
         type: string
         prompt: What's your name?
         default: world
   deploy:
-    cmd: ./deploy.sh {{confirm}}
+    cmd: ./deploy.sh {{env}} {{confirm}}
     variables:
-      confirm:
-        type: confirm        # resolves to "yes" or "no"
+      - name: env             # prompted first
+        type: select
+        options: [staging, prod]
+      - name: confirm         # prompted second; resolves to "yes" or "no"
+        type: confirm
 ```
+
+## Execution overrides
+
+Each command can optionally pin a working directory and add environment variables:
+
+```yaml
+commands:
+  flutter-build:
+    cmd: flutter build {{platform}}
+    cwd: ~/projects/myapp
+    env:
+      NODE_OPTIONS: --max-old-space-size=8192
+    variables:
+      - name: platform
+        type: select
+        options: [ios, android, web]
+```
+
+`cwd` accepts a leading `~/` for your home directory; anything else is passed verbatim. `env` is merged onto the inherited environment with per-command entries winning.
 
 ## Encryption design
 
 - Each sensitive command is encrypted with an [age](https://github.com/FiloSottile/age) X25519 recipient and stored ASCII-armored in `config.yaml`.
 - The X25519 identity itself lives in `~/.uch/identity.age`, encrypted with your master password via age's scrypt passphrase recipient.
 - The master password is never written to disk. `uch` prompts for it on every sensitive run; session caching is on the roadmap.
+
+## Schema stability
+
+`config.yaml` carries a `version: 1` field at the top. This is the **schema version**, not the CLI version — it increments only when the file structure changes in a way that requires migration. Bug fixes, new commands, and new flags do not bump it.
+
+The following fields are committed-stable: renaming or removing them is a breaking change that requires a schema bump and a migration:
+
+- `version`, `encryption.enabled`, `commands`
+- `commands.<name>.cmd`, `commands.<name>.cmd_encrypted`, `commands.<name>.sensitive`
+- `commands.<name>.variables.<name>.type` with values `string`, `select`, `confirm`
+- `commands.<name>.variables.<name>.options`, `prompt`, `default`
+
+Unknown fields are rejected on load so typos and version mismatches surface immediately.
+
+A `created_by` field is written at every save (e.g. `created_by: uch 0.2.0`) as a diagnostic breadcrumb. It is never used for compatibility logic.

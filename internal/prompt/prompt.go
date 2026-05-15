@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sort"
 	"strings"
 
 	"github.com/vieolo/termange/tui"
@@ -14,23 +13,16 @@ import (
 	"golang.org/x/term"
 )
 
-// ResolveVariables prompts the user for each variable defined on a command and
+// ResolveVariables prompts the user for each variable in the order given and
 // returns name -> value. The values are ready to be substituted into the cmd
 // string. Confirm variables resolve to "yes" or "no".
-func ResolveVariables(vars map[string]config.Variable) (map[string]string, error) {
+func ResolveVariables(vars []config.Variable) (map[string]string, error) {
 	out := make(map[string]string, len(vars))
 
-	names := make([]string, 0, len(vars))
-	for name := range vars {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-
-	for _, name := range names {
-		v := vars[name]
+	for _, v := range vars {
 		label := v.Prompt
 		if label == "" {
-			label = name
+			label = v.Name
 		}
 
 		switch v.Type {
@@ -44,10 +36,10 @@ func ResolveVariables(vars map[string]config.Variable) (map[string]string, error
 			if strings.TrimSpace(val) == "" {
 				val = v.Default
 			}
-			out[name] = val
+			out[v.Name] = val
 		case config.VarSelect:
 			if len(v.Options) == 0 {
-				return nil, fmt.Errorf("variable %q is type select but has no options", name)
+				return nil, fmt.Errorf("variable %q is type select but has no options", v.Name)
 			}
 			items := make([]tui.SelectItem, 0, len(v.Options))
 			for _, opt := range v.Options {
@@ -58,21 +50,21 @@ func ResolveVariables(vars map[string]config.Variable) (map[string]string, error
 				Items: items,
 			})
 			if err != nil {
-				return nil, fmt.Errorf("select for %q failed: %w", name, err)
+				return nil, fmt.Errorf("select for %q failed: %w", v.Name, err)
 			}
 			if choice == "" {
-				return nil, fmt.Errorf("no option selected for %q", name)
+				return nil, fmt.Errorf("no option selected for %q", v.Name)
 			}
-			out[name] = choice
+			out[v.Name] = choice
 		case config.VarConfirm:
 			ans := tui.Confirm(tui.ConfirmOptions{Prompt: label})
 			if ans {
-				out[name] = "yes"
+				out[v.Name] = "yes"
 			} else {
-				out[name] = "no"
+				out[v.Name] = "no"
 			}
 		default:
-			return nil, fmt.Errorf("variable %q has unknown type %q", name, v.Type)
+			return nil, fmt.Errorf("variable %q has unknown type %q", v.Name, v.Type)
 		}
 	}
 	return out, nil

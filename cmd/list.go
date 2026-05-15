@@ -44,17 +44,12 @@ var listCmd = &cobra.Command{
 			}
 			fmt.Printf("      %s\n", body)
 			if len(entry.Variables) > 0 {
-				varNames := make([]string, 0, len(entry.Variables))
-				for v := range entry.Variables {
-					varNames = append(varNames, v)
-				}
-				sort.Strings(varNames)
 				fmt.Printf("      vars: ")
-				for i, vn := range varNames {
+				for i, v := range entry.Variables {
 					if i > 0 {
 						fmt.Print(", ")
 					}
-					fmt.Printf("%s(%s)", vn, entry.Variables[vn].Type)
+					fmt.Printf("%s(%s)", v.Name, v.Type)
 				}
 				fmt.Println()
 			}

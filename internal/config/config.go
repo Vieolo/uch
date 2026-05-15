@@ -25,9 +25,11 @@ const (
 	VarConfirm VarType = "confirm"
 )
 
-// Variable describes a placeholder in a command's `cmd` string.
-// The user is prompted for a value at run time according to Type.
+// Variable describes a placeholder in a command's `cmd` string. Variables are
+// stored as an ordered list (not a map) so the prompt order is authored, not
+// alphabetical.
 type Variable struct {
+	Name    string   `yaml:"name"`
 	Type    VarType  `yaml:"type"`
 	Prompt  string   `yaml:"prompt,omitempty"`
 	Options []string `yaml:"options,omitempty"`
@@ -36,23 +38,23 @@ type Variable struct {
 
 // Command is one stored command. Either Cmd or CmdEncrypted is set; never both.
 // CmdEncrypted is an age-armored ASCII envelope when Sensitive is true.
+//
+// Cwd and Env are optional execution overrides. Cwd accepts a leading "~/" for
+// the user's home; Env is merged onto the inherited environment.
 type Command struct {
-	Description  string              `yaml:"description,omitempty"`
-	Cmd          string              `yaml:"cmd,omitempty"`
-	CmdEncrypted string              `yaml:"cmd_encrypted,omitempty"`
-	Sensitive    bool                `yaml:"sensitive,omitempty"`
-	Variables    map[string]Variable `yaml:"variables,omitempty"`
-}
-
-type Encryption struct {
-	Enabled bool `yaml:"enabled"`
+	Description  string            `yaml:"description,omitempty"`
+	Cmd          string            `yaml:"cmd,omitempty"`
+	CmdEncrypted string            `yaml:"cmd_encrypted,omitempty"`
+	Sensitive    bool              `yaml:"sensitive,omitempty"`
+	Cwd          string            `yaml:"cwd,omitempty"`
+	Env          map[string]string `yaml:"env,omitempty"`
+	Variables    []Variable        `yaml:"variables,omitempty"`
 }
 
 type Config struct {
-	Version    int                `yaml:"version"`
-	CreatedBy  string             `yaml:"created_by,omitempty"`
-	Encryption Encryption         `yaml:"encryption"`
-	Commands   map[string]Command `yaml:"commands"`
+	Version   int                `yaml:"version"`
+	CreatedBy string             `yaml:"created_by,omitempty"`
+	Commands  map[string]Command `yaml:"commands"`
 }
 
 type Paths struct {
@@ -88,6 +90,7 @@ func SetCreatedBy(s string) {
 // Load reads ~/.uch/config.yaml, creating an empty one if it does not exist.
 // Unknown fields are rejected (catches typos and "config from a newer uch").
 // Configs from older schemas are migrated to CurrentSchemaVersion before return.
+// The result is validated for internal consistency.
 func Load() (Config, Paths, error) {
 	paths, err := GetPaths()
 	if err != nil {
@@ -115,8 +118,6 @@ func Load() (Config, Paths, error) {
 	dec := yaml.NewDecoder(bytes.NewReader(data))
 	dec.KnownFields(true)
 	if err := dec.Decode(&c); err != nil {
-		// yaml.v3 wraps unknown-field errors with a helpful line number, but
-		// the phrasing is technical. Surface a friendlier hint when we can.
 		if strings.Contains(err.Error(), "field") && strings.Contains(err.Error(), "not found") {
 			return Config{}, paths, fmt.Errorf("config.yaml has a field this version of uch does not recognize — either a typo or a newer schema: %w", err)
 		}
@@ -136,12 +137,15 @@ func Load() (Config, Paths, error) {
 	if c.Commands == nil {
 		c.Commands = map[string]Command{}
 	}
+
+	if err := c.Validate(); err != nil {
+		return Config{}, paths, fmt.Errorf("config.yaml is invalid: %w", err)
+	}
 	return c, paths, nil
 }
 
 // migrate applies forward migrations until c.Version == CurrentSchemaVersion.
-// Each step handles exactly one N -> N+1 transition. Today there are no past
-// schemas, so we just accept legacy (version: 0, i.e. missing) configs as v1.
+// Each step handles exactly one N -> N+1 transition.
 func migrate(c Config) (Config, error) {
 	for c.Version < CurrentSchemaVersion {
 		switch c.Version {
@@ -154,6 +158,53 @@ func migrate(c Config) (Config, error) {
 		}
 	}
 	return c, nil
+}
+
+// Validate checks the config for internal consistency. It is called by Load
+// and may be called by tools that need to verify hand-edited configs.
+//
+// Checks:
+//   - exactly one of Cmd / CmdEncrypted is set per command
+//   - Sensitive and CmdEncrypted agree
+//   - variable names are non-empty and unique within a command
+//   - variables of type select have non-empty Options
+func (c Config) Validate() error {
+	for name, cmd := range c.Commands {
+		if cmd.Sensitive && cmd.CmdEncrypted == "" {
+			return fmt.Errorf("command %q is marked sensitive but has no cmd_encrypted body", name)
+		}
+		if !cmd.Sensitive && cmd.CmdEncrypted != "" {
+			return fmt.Errorf("command %q has cmd_encrypted set without sensitive: true", name)
+		}
+		if cmd.Cmd != "" && cmd.CmdEncrypted != "" {
+			return fmt.Errorf("command %q has both cmd and cmd_encrypted set", name)
+		}
+		if cmd.Cmd == "" && cmd.CmdEncrypted == "" {
+			return fmt.Errorf("command %q has no body (cmd or cmd_encrypted must be set)", name)
+		}
+
+		seen := make(map[string]bool, len(cmd.Variables))
+		for i, v := range cmd.Variables {
+			if v.Name == "" {
+				return fmt.Errorf("command %q has a variable at index %d with no name", name, i)
+			}
+			if seen[v.Name] {
+				return fmt.Errorf("command %q has duplicate variable %q", name, v.Name)
+			}
+			seen[v.Name] = true
+			switch v.Type {
+			case VarString, VarConfirm:
+				// nothing more to check
+			case VarSelect:
+				if len(v.Options) == 0 {
+					return fmt.Errorf("command %q variable %q is type select but has no options", name, v.Name)
+				}
+			default:
+				return fmt.Errorf("command %q variable %q has unknown type %q", name, v.Name, v.Type)
+			}
+		}
+	}
+	return nil
 }
 
 // Save writes the config back to ~/.uch/config.yaml atomically with 0600

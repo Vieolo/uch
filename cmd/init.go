@@ -42,17 +42,6 @@ Run this once. Use 'uch passwd' to change the password later.`,
 			os.Exit(1)
 		}
 
-		cfg, _, err := config.Load()
-		if err != nil {
-			termange.PrintErrorf("Could not reload config: %v\n", err)
-			os.Exit(1)
-		}
-		cfg.Encryption.Enabled = true
-		if err := config.Save(cfg); err != nil {
-			termange.PrintErrorf("Could not update config: %v\n", err)
-			os.Exit(1)
-		}
-
 		termange.PrintSuccessf("Identity created at %s\n", paths.IdentityPath)
 		termange.PrintWarningln("Back up this file. If you lose it, sensitive commands cannot be recovered.")
 	},
