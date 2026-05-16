@@ -1,0 +1,7 @@
+name: uch
+description: universal command helper
+version: 0.1.0
+
+commands:
+  # build: go build main.go
+  # test: go test
