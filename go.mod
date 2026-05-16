@@ -5,7 +5,7 @@ go 1.25.5
 require (
 	filippo.io/age v1.3.1
 	github.com/spf13/cobra v1.10.2
-	github.com/vieolo/filange v0.2.1
+	github.com/vieolo/filange v0.2.2
 	github.com/vieolo/termange v0.8.0
 	golang.org/x/term v0.43.0
 	gopkg.in/yaml.v3 v3.0.1
