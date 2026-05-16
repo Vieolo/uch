@@ -1,10 +1,15 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package main
 
-import cmd "github.com/vieolo/uch/cmd"
+import (
+	_ "embed"
+
+	"github.com/vieolo/uch/cmd"
+)
+
+//go:embed go.yaml
+var thisGyByte []byte
 
 func main() {
+	cmd.ThisGyByte = thisGyByte
 	cmd.Execute()
 }
