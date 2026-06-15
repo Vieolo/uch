@@ -2,6 +2,7 @@ name: uch
 description: universal command helper
 version: 0.2.0
 
-commands:
-  # build: go build main.go
-  # test: go test
+external:
+  gomore:
+    commands:
+      local-install: "go build -o $GOPATH/bin/uch-dev main.go"
