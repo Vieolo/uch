@@ -99,7 +99,7 @@ Variables can be added afterwards by editing the file with 'uch edit'.`,
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-	addCmd.Flags().BoolVarP(&addSensitive, "sensitive", "s", false, "Encrypt the command with the master password")
+	addCmd.Flags().BoolVarP(&addSensitive, "sensitive", "s", false, "Encrypt the command with the uch password")
 	addCmd.Flags().StringVarP(&addCmd_string, "cmd", "c", "", "The command body (skips the prompt)")
 	addCmd.Flags().StringVarP(&addDescription, "description", "d", "", "Optional description")
 }

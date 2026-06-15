@@ -19,7 +19,7 @@ var runCmd = &cobra.Command{
 	Use:   "run <name>",
 	Short: "Run a stored command by its nickname",
 	Long: `Runs the command stored under <name>.
-If the command is sensitive, you will be prompted for the master password.
+If the command is sensitive, you will be prompted for the uch password.
 If the command defines variables, you will be prompted for each one before execution.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {

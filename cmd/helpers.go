@@ -12,7 +12,7 @@ import (
 	"github.com/vieolo/uch/internal/prompt"
 )
 
-// unlockIdentity prompts for the master password and returns the decrypted
+// unlockIdentity prompts for the uch password and returns the decrypted
 // identity. Returns ErrNoIdentity if the identity file does not exist.
 var errNoIdentity = errors.New("identity not initialized")
 
@@ -20,7 +20,7 @@ func unlockIdentity(paths config.Paths) (*age.X25519Identity, error) {
 	if !filange.FileExists(paths.IdentityPath) {
 		return nil, errNoIdentity
 	}
-	pw, err := prompt.Password("Master password:")
+	pw, err := prompt.Password("uch password:")
 	if err != nil {
 		return nil, err
 	}
