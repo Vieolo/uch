@@ -5,4 +5,4 @@ version: 0.2.0
 external:
   gomore:
     commands:
-      local-install: "go build -o $GOPATH/bin/uch-dev main.go"
+      local-install: "go build -tags dev -o $GOPATH/bin/uch-dev main.go"
