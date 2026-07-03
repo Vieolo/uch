@@ -1,6 +1,6 @@
 name: uch
 description: universal command helper
-version: 0.2.0
+version: 0.2.1
 
 external:
   gomore:

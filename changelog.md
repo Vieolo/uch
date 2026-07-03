@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.2.1 (2026-07-03)
+- Improved the structure of the outputs
+- Improved the experience while using the `add` function
+
 ## v0.2.0 (2026-05-15)
 
 #### Breaking changes
