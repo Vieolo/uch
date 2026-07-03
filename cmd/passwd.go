@@ -11,7 +11,7 @@ import (
 
 var passwdCmd = &cobra.Command{
 	Use:   "passwd",
-	Short: "Change the master password",
+	Short: "Change the uch password",
 	Long: `Re-encrypts ~/.uch/identity.age with a new password.
 All existing sensitive commands remain valid; only the identity file changes.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -34,7 +34,7 @@ All existing sensitive commands remain valid; only the identity file changes.`,
 		must(err, "Could not read new password")
 
 		must(crypto.ChangePassword(paths.IdentityPath, oldPw, newPw), "Could not change password")
-		termange.PrintSuccessln("Master password changed.")
+		termange.PrintSuccessln("uch password changed.")
 	},
 }
 

@@ -22,7 +22,7 @@ var editCmd = &cobra.Command{
 	Short: "Edit the stored commands in your $EDITOR",
 	Long: `Opens config.yaml in $EDITOR (default: vim).
 Without --admin, sensitive commands are shown as a placeholder and you cannot
-change their body. With --admin, you are prompted for the master password, the
+change their body. With --admin, you are prompted for the uch password, the
 sensitive commands are shown in plaintext, and any changes are re-encrypted on
 save.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -163,5 +163,5 @@ func runEditor(path string) {
 
 func init() {
 	rootCmd.AddCommand(editCmd)
-	editCmd.Flags().BoolVar(&editAdmin, "admin", false, "Decrypt sensitive commands for editing; requires the master password")
+	editCmd.Flags().BoolVar(&editAdmin, "admin", false, "Decrypt sensitive commands for editing; requires the uch password")
 }

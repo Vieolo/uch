@@ -1,5 +1,5 @@
 // Package prompt provides the user-facing prompts uch needs at run time:
-// resolving placeholder variables, and reading a master password without echo.
+// resolving placeholder variables, and reading the uch password without echo.
 package prompt
 
 import (
@@ -104,7 +104,7 @@ func Password(prompt string) (string, error) {
 }
 
 // PasswordWithConfirm prompts twice and ensures the entries match. Used at init
-// and when changing the master password.
+// and when changing the uch password.
 func PasswordWithConfirm(prompt string) (string, error) {
 	pw1, err := Password(prompt)
 	if err != nil {

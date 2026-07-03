@@ -4,19 +4,21 @@
 
 ## Install
 
-**Homebrew (macOS / Linux)** — recommended:
+**Homebrew (macOS / Linux)**:
 
 ```bash
 brew install vieolo/tap/uch
 ```
 
-**From source** (requires Go):
+**From source** (using Go):
 
 ```bash
 go install github.com/vieolo/uch@latest
 ```
 
+
 **Pre-built binaries** for Linux, macOS, and Windows are attached to every [GitHub release](https://github.com/vieolo/uch/releases).
+
 
 ## Quick start
 
@@ -31,28 +33,28 @@ uch edit                # add a `variables: { platform: { type: select, options:
 uch run fb              # prompts for platform via a select TUI
 
 # Sensitive command (encrypted at rest)
-uch init                # set a master password (once)
+uch init                # set a uch password (once)
 uch add db-prod --sensitive --cmd 'psql postgres://user:foo@bar/db'
-uch run db-prod         # prompts for the master password, then runs
+uch run db-prod         # prompts for the uch password, then runs
 ```
 
 ## Storage
 
-- `~/.uch/config.yaml` — your commands (mode 0600).
-- `~/.uch/identity.age` — the age identity used to encrypt sensitive commands, itself protected by your master password (mode 0600). **Back this up.** Losing it means losing every sensitive command.
+- `~/.uch/config.yaml`: your commands (mode 0600).
+- `~/.uch/identity.age`: the age identity used to encrypt sensitive commands, itself protected by your uch password (mode 0600). **You should Back up this file** as losing it means losing access to every sensitive command.
 
 ## Commands
 
 | Command | Purpose |
 |---|---|
-| `uch init` | Set the master password and create the encryption identity. |
+| `uch init` | Set the uch password and create the encryption identity. |
 | `uch add <name>` | Add a command. Flags: `--cmd`, `--sensitive`, `--description`. |
 | `uch list` (`ls`) | Show all stored commands. |
 | `uch remove <name>` (`rm`) | Delete a command. `--force` to skip confirmation. |
 | `uch run <name>` | Resolve variables, decrypt if sensitive, execute. |
 | `uch edit` | Open `config.yaml` in `$EDITOR`. Sensitive commands are masked. |
 | `uch edit --admin` | Same as `edit` but decrypts sensitive commands for editing. |
-| `uch passwd` | Change the master password (commands stay valid). |
+| `uch passwd` | Change the uch password (commands stay valid). |
 
 ## Variables
 
@@ -106,8 +108,8 @@ commands:
 ## Encryption design
 
 - Each sensitive command is encrypted with an [age](https://github.com/FiloSottile/age) X25519 recipient and stored ASCII-armored in `config.yaml`.
-- The X25519 identity itself lives in `~/.uch/identity.age`, encrypted with your master password via age's scrypt passphrase recipient.
-- The master password is never written to disk. `uch` prompts for it on every sensitive run; session caching is on the roadmap.
+- The X25519 identity itself lives in `~/.uch/identity.age`, encrypted with your uch password via age's scrypt passphrase recipient.
+- The uch password is never written to disk. `uch` prompts for it on every sensitive run; session caching is on the roadmap.
 
 ## Schema stability
 

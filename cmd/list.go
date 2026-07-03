@@ -32,17 +32,17 @@ var listCmd = &cobra.Command{
 			entry := cfg.Commands[name]
 			marker := ""
 			if entry.Sensitive {
-				marker = " [sensitive]"
+				marker = termange.PaintText(" [sensitive]", termange.ColorYellow)
 			}
-			body := entry.Cmd
+			body := termange.PaintText(entry.Cmd, termange.ColorWhite)
 			if entry.Sensitive {
-				body = "<encrypted>"
+				body = termange.PaintText("<encrypted>", termange.ColorYellow)
 			}
-			fmt.Printf("  %s%s\n", name, marker)
+			fmt.Printf(" - %s%s\n", name, marker)
 			if entry.Description != "" {
 				fmt.Printf("      %s\n", entry.Description)
 			}
-			fmt.Printf("      %s\n", body)
+			fmt.Printf("    └──>> %s\n", body)
 			if len(entry.Variables) > 0 {
 				fmt.Printf("      vars: ")
 				for i, v := range entry.Variables {
