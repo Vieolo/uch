@@ -2,7 +2,7 @@
 //
 // Model:
 //   - One long-lived X25519 identity stores in ~/.uch/identity.age, itself
-//     encrypted with the user's master password via age's scrypt recipient.
+//     encrypted with the user's uch password via age's scrypt recipient.
 //   - Sensitive commands are encrypted to the X25519 recipient and stored
 //     ASCII-armored inside config.yaml.
 //   - The password never touches disk; it only unlocks the identity in memory.
@@ -21,7 +21,7 @@ import (
 	"github.com/vieolo/uch/internal/fsutil"
 )
 
-// ErrWrongPassword is returned when the master password fails to unlock the identity.
+// ErrWrongPassword is returned when the uch password fails to unlock the identity.
 var ErrWrongPassword = errors.New("wrong password")
 
 // GenerateIdentity creates a new X25519 identity, encrypts it with the given

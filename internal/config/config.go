@@ -64,11 +64,10 @@ type Paths struct {
 }
 
 func GetPaths() (Paths, error) {
-	home, err := os.UserHomeDir()
+	dir, err := getConfigPath()
 	if err != nil {
-		return Paths{}, fmt.Errorf("could not resolve home directory: %w", err)
+		return Paths{}, nil
 	}
-	dir := filepath.Join(home, ".uch")
 	return Paths{
 		Dir:          dir,
 		ConfigPath:   filepath.Join(dir, "config.yaml"),

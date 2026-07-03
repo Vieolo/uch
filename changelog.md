@@ -4,7 +4,7 @@
 
 #### Breaking changes
 - Switched the central config from JSON to YAML (`~/.uch/config.yaml`).
-- Introduced encryption for sensitive commands using [age](https://github.com/FiloSottile/age). A new master password unlocks an X25519 identity stored at `~/.uch/identity.age`.
+- Introduced encryption for sensitive commands using [age](https://github.com/FiloSottile/age). A new uch password unlocks an X25519 identity stored at `~/.uch/identity.age`.
 - Added commands: `init`, `add`, `list` (`ls`), `remove` (`rm`), `passwd`. Implemented `run` and rewrote `edit` (with a `--admin` tier for editing sensitive bodies).
 - Added typed variables (`string`, `select`, `confirm`) with `{{name}}` placeholder substitution. Variables are an ordered list, so the user is prompted in authored order.
 - Added per-command `cwd` and `env` execution overrides.

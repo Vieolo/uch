@@ -14,7 +14,7 @@ import (
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize the encryption identity for sensitive commands",
-	Long: `Sets a master password and creates the age identity at ~/.uch/identity.age.
+	Long: `Sets the uch password and creates the age identity at ~/.uch/identity.age.
 The identity is required to store or run any command marked sensitive: true.
 Run this once. Use 'uch passwd' to change the password later.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -30,7 +30,7 @@ Run this once. Use 'uch passwd' to change the password later.`,
 			os.Exit(1)
 		}
 
-		termange.PrintInfoln("Pick a master password. You will be asked for it every time you run a sensitive command.")
+		termange.PrintInfoln("Pick a password for uch. You will be asked for it every time you run a sensitive command.")
 		pw, err := prompt.PasswordWithConfirm("New password:")
 		if err != nil {
 			termange.PrintErrorf("%v\n", err)
